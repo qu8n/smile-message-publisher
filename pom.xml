@@ -6,19 +6,42 @@
   <artifactId>cmo-sample-publisher</artifactId>
   <name>CMO Sample Publisher Master</name>
   <version>0.0.1-SNAPSHOT</version>
-  <description>master maven module</description>
+  <description>Sample Publisher project for Spring Boot</description>
   <packaging>jar</packaging>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.2.1.RELEASE</version>
+  </parent>
 
   <properties>
     <java.version>1.8</java.version>
     <maven.compiler.version>1.8</maven.compiler.version>
     <spring.boot.version>2.3.3.RELEASE</spring.boot.version>
   </properties>
+
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
+
   <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-neo4j</artifactId>
       <version>${spring.boot.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.neo4j</groupId>
@@ -31,7 +54,27 @@
       <artifactId>server-community</artifactId>
       <version>2.2.6.35</version>
     </dependency>
+
+    <!-- messaging-java -->
+    <dependency>
+      <groupId>com.github.mskcc</groupId>
+      <artifactId>cmo-messaging-java</artifactId>
+      <version>b88a0cdd435c79a8aab7c4ffe480472de5bac4a6</version>
+    </dependency>
+    <!-- limsrest and metadb shared entities -->
+    <dependency>
+      <groupId>com.github.mskcc</groupId>
+      <artifactId>cmo-metadb-shared-entities</artifactId>
+      <version>v1.1-alpha</version>
+    </dependency>      
+    <!-- gson -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.8.6</version>
+    </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
