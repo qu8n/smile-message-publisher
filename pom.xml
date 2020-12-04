@@ -19,6 +19,9 @@
     <java.version>1.8</java.version>
     <maven.compiler.version>1.8</maven.compiler.version>
     <spring.boot.version>2.3.3.RELEASE</spring.boot.version>
+    <messaging.java.groupId>com.github.mskcc</messaging.java.groupId>
+    <messaging.java.artifactId>cmo-messaging-java</messaging.java.artifactId>
+    <messaging.java.version>v1.0-alpha</messaging.java.version>
   </properties>
 
   <repositories>
@@ -54,19 +57,24 @@
       <artifactId>server-community</artifactId>
       <version>2.2.6.35</version>
     </dependency>
-
+    <!-- java nats streaming -->
+    <dependency>
+      <groupId>io.nats</groupId>
+      <artifactId>java-nats-streaming</artifactId>
+      <version>2.2.3</version>
+    </dependency>
     <!-- messaging-java -->
     <dependency>
-      <groupId>com.github.mskcc</groupId>
-      <artifactId>cmo-messaging-java</artifactId>
-      <version>b88a0cdd435c79a8aab7c4ffe480472de5bac4a6</version>
+      <groupId>${messaging.java.groupId}</groupId>
+      <artifactId>${messaging.java.artifactId}</artifactId>
+      <version>${messaging.java.version}</version>
     </dependency>
     <!-- limsrest and metadb shared entities -->
     <dependency>
       <groupId>com.github.mskcc</groupId>
       <artifactId>cmo-metadb-shared-entities</artifactId>
       <version>v1.1-alpha</version>
-    </dependency>      
+    </dependency>
     <!-- gson -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -77,6 +85,10 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
