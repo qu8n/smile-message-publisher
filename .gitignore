@@ -1,2 +1,3 @@
 /target/
 *checkstyle_report*.txt
+*application.properties
