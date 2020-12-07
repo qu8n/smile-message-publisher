@@ -39,35 +39,33 @@ public class NewSamplePublisher implements CommandLineRunner {
         SpringApplication.run(NewSamplePublisher.class, args);
     }
 
-
     /**
-     * Creates mock sample data.. when neo4j is hooked up we can uncomment the "addSample" calls.
-     * @param sampleId
+     * Reads file and returns an instance of SampleMetadata
+     * 
+     * @param fileName
      * @return
      */
-    private SampleMetadata mockSampleMetadata(String sampleId) {
-        SampleMetadata sMetadata = new SampleMetadata();
-        sMetadata.setInvestigatorSampleId(sampleId);
-        sMetadata.setIgoId("IGO-" + sampleId);
-        sMetadata.setSampleOrigin("");
-        sMetadata.setSex("");
-        sMetadata.setSpecies("");
-        sMetadata.setSpecimenType("");
-        sMetadata.setTissueLocation("");
-        sMetadata.setTumorOrNormal("TUMOR");
-        return sMetadata;
+    public SampleMetadata readFile(String fileName) {
+        try {
+            Gson gson = new Gson();
+            Reader reader = Files.newBufferedReader(Paths.get(fileName));
+            SampleMetadata s = gson.fromJson(reader, SampleMetadata.class);
+            return s;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
     public void run(String... args) throws Exception {
+        String fileName = args[0];
         messagingGateway.connect();
         try {
-            List<String> sampleIds = Arrays.asList(new String[]{"sample1", "sample2", "sample3", "sample4"});
-            for (String sampleId : sampleIds) {
-                System.out.println("Publishing new sample: " + sampleId + " on topic: " + topic);
-                SampleMetadata s = mockSampleMetadata(sampleId);
-                messagingGateway.publish(topic, s);
-            }
+            SampleMetadata s = readFile(fileName);
+            System.out.println("Publishing new sample: " + s.getIgoId() + " on topic: " + topic);
+            messagingGateway.publish(topic, s);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,3 +1,9 @@
-/target/
-*checkstyle_report*.txt
+*.DS_Store
+*.classpath
+*.metadata
+*.metadata/target/
+*.project
+*.settings
 *application.properties
+*checkstyle_report*.txt
+/target/
