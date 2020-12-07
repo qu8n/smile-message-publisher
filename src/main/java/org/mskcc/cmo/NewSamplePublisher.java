@@ -31,14 +31,9 @@ public class NewSamplePublisher implements CommandLineRunner {
 
     @Autowired
     private Gateway messagingGateway;
-    private static int numOfSamples;
 
-    private static String fileName;
-
-    private static List<SampleMetadata> meta;
-
-    @Value("${igo_new_sample}")
-    private static String topic;
+    @Value("${igo.new_sample_intake_topic}")
+    private String topic;
 
     public static void main(String[] args) throws Exception {
         SpringApplication.run(NewSamplePublisher.class, args);
@@ -50,7 +45,7 @@ public class NewSamplePublisher implements CommandLineRunner {
      * @param sampleId
      * @return
      */
-    private static SampleMetadata mockSampleMetadata(String sampleId) {
+    private SampleMetadata mockSampleMetadata(String sampleId) {
         SampleMetadata sMetadata = new SampleMetadata();
         sMetadata.setInvestigatorSampleId(sampleId);
         sMetadata.setIgoId("IGO-" + sampleId);
@@ -60,33 +55,16 @@ public class NewSamplePublisher implements CommandLineRunner {
         sMetadata.setSpecimenType("");
         sMetadata.setTissueLocation("");
         sMetadata.setTumorOrNormal("TUMOR");
-        // sMetadata.addSample(new Sample("P-0002978-IM5-T02", "DMP"));
-        // sMetadata.addSample(new Sample("DrilA_NTRK_X_0001_JV_P1", "DARWIN"));
-        // sMetadata.addSample(new Sample("s_C_000520_X001_d", "CMO"));
         return sMetadata;
-    }
-
-    /**
-     * Unused for now.
-     * @param patientId
-     * @return
-     */
-    private PatientMetadata mockPatientMetadata(String patientId) {
-        PatientMetadata pMetadata = new PatientMetadata();
-        pMetadata.setInvestigatorPatientId(patientId);
-        pMetadata.addPatient(new Patient("P-0002978", "DMP"));
-        pMetadata.addPatient(new Patient("215727", "DARWIN"));
-        return pMetadata;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        Gson gson = new Gson();
         messagingGateway.connect();
         try {
             List<String> sampleIds = Arrays.asList(new String[]{"sample1", "sample2", "sample3", "sample4"});
             for (String sampleId : sampleIds) {
-                System.out.println("Publishing new sample: " + sampleId);
+                System.out.println("Publishing new sample: " + sampleId + " on topic: " + topic);
                 SampleMetadata s = mockSampleMetadata(sampleId);
                 messagingGateway.publish(topic, s);
             }
