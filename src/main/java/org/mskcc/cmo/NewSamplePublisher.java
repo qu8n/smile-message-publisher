@@ -1,21 +1,11 @@
 package org.mskcc.cmo;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
-import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 import org.mskcc.cmo.messaging.Gateway;
 import org.mskcc.cmo.shared.SampleMetadata;
-import org.mskcc.cmo.shared.neo4j.Patient;
-import org.mskcc.cmo.shared.neo4j.PatientMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -41,7 +31,7 @@ public class NewSamplePublisher implements CommandLineRunner {
 
     /**
      * Reads file and returns an instance of SampleMetadata
-     * 
+     *
      * @param fileName
      * @return
      */
