@@ -1,7 +1,14 @@
 # client-specific topics to listen or publish on
-igo.new_sample_intake_topic=
+igo.new_request_topic=
 
 # nats connection properties
 nats.clusterid=
 nats.clientid=
 nats.url=
+
+# lims connection properties
+lims.base_url=
+lims.username=
+lims.password=
+lims.request_samples_endpoint=
+lims.sample_manifest_endpoint=
