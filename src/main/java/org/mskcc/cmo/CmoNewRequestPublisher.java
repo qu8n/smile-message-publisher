@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.net.ssl.HostnameVerifier;
@@ -84,12 +83,12 @@ public class CmoNewRequestPublisher implements CommandLineRunner {
             log.error("Error encountered during attempt to process request ids - exiting...");
             throw new RuntimeException(e);
         }
-        log.info("Finished processing requests, exiting...");
-        System.exit(0);
     }
 
     /**
-     * Returns the sample manifest list for all samples given a request id.
+     * Returns request metadata and the sample manifest list for all samples given a request id.
+     * Note that the project id is simply the prefix of the request id. LIMS team
+     * confirmed that this assumption is okay to make.
      * @param requestId
      * @return Map
      * @throws Exception
@@ -108,14 +107,10 @@ public class CmoNewRequestPublisher implements CommandLineRunner {
         // then fetch sample manifest for each sample from getSampleManifest endpoint
         Map<String, Object> limsResponse = getLimsRequestSamples(requestId);
         List<SampleManifest> sampleManifestList = getSampleManifestList(limsResponse);
-
-        Map<String, Object> toReturn = new HashMap<>();
-        toReturn.put("requestId", requestId);
-        toReturn.put("sampleManifestList", sampleManifestList);
-        // we dont know the project id from getRequestSamples
-        // this cannot be added to the returned map yet
-        //toReturn.put("projectId", response.get("projectId"));
-        return toReturn;
+        String projectId = requestId.split("_")[0];
+        limsResponse.put("projectId", projectId);
+        limsResponse.put("sampleManifestList", sampleManifestList);
+        return limsResponse;
     }
 
     /**
