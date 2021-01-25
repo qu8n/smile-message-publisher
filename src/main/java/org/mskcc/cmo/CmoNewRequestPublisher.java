@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -122,8 +121,20 @@ public class CmoNewRequestPublisher implements CommandLineRunner {
     private List<SampleManifest> getSampleManifestList(Map<String, Object> response) throws Exception {
         // get sample ids and compile into param to pass to getSampleManifest endpoint
         List<String> sampleIds = getSampleIdsFromRequestResponse(response);
-        String sampleIdsParam = StringUtils.join(sampleIds, "&igoSampleId=");
-        String manifestUrl = limsBaseUrl + limsSampleManifestEndpoint + sampleIdsParam;
+        List<SampleManifest> sampleManifestList = new ArrayList<>();
+        for (String sampleId : sampleIds) {
+            sampleManifestList.addAll(getSampleManifest(sampleId));
+        }
+        return sampleManifestList;
+    }
+
+    /**
+     * Returns a list with a single sample manifest object given a sample id.
+     * @param sampleId
+     * @return List
+     */
+    private List<SampleManifest> getSampleManifest(String sampleId) throws Exception {
+        String manifestUrl = limsBaseUrl + limsSampleManifestEndpoint + sampleId;
         log.debug("Sending request for sample manifest with url:" + manifestUrl);
 
         RestTemplate restTemplate = getRestTemplate();
