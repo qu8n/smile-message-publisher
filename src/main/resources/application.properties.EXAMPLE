@@ -12,3 +12,4 @@ lims.username=
 lims.password=
 lims.request_samples_endpoint=
 lims.sample_manifest_endpoint=
+lims.request_deliveries_endpoint=

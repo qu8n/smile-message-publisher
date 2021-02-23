@@ -2,13 +2,21 @@ package org.mskcc.cmo;
 
 import com.google.gson.Gson;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,6 +71,10 @@ public class CmoNewRequestPublisher implements CommandLineRunner {
     @Value("${lims.sample_manifest_endpoint}")
     private String limsSampleManifestEndpoint;
 
+    @Value("${lims.request_deliveries_endpoint}")
+    private String limsRequestDeliveriesEndpoint;
+
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
     private Map<String, List<String>> limsrestRequestErrors = new HashMap<>();
 
     private final Log log = LogFactory.getLog(CmoNewRequestPublisher.class);
@@ -71,16 +83,61 @@ public class CmoNewRequestPublisher implements CommandLineRunner {
         SpringApplication.run(CmoNewRequestPublisher.class, args);
     }
 
+    private Options getOptions(String[] args) {
+        Options options = new Options();
+        options.addOption("h", "help", false, "shows this help document and quits.")
+                .addOption("r", "request_ids", true, "Comma-separated list of request ids to fetch "
+                + "data for from LimsRest")
+                .addOption("s", "start_date", true, "Start date [YYYY/MM/DD], fetch requests from "
+                        + "LimsRest beginning from the given start date")
+                .addOption("e", "end_date", true, "End date [YYYY/MM/DD]. Fetch requests from LimsRest "
+                        + "between the start and end dates provided. [OPTIONAL]");
+        return options;
+    }
+
+    private void help(Options options, int exitStatus) {
+        HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp("CmoNewRequestPublisher", options);
+        System.exit(exitStatus);
+    }
+
+    private CommandLine parseArgs(String[] args) throws Exception {
+        Options options = getOptions(args);
+        CommandLineParser parser = new DefaultParser();
+        CommandLine commandLine = parser.parse(options, args);
+        if (commandLine.hasOption("h")
+                || (!commandLine.hasOption("r") && !commandLine.hasOption("s"))) {
+            help(options, 0);
+        }
+        if (commandLine.hasOption("r") && (commandLine.hasOption("s") || commandLine.hasOption("e"))) {
+            log.error("Cannot use '--request_ids with '--start_date' or '--end_date'");
+            help(options, 1);
+        }
+        return commandLine;
+    }
+
     @Override
     public void run(String... args) throws Exception {
-        String requestIds = args[0];
+        CommandLine commandLine = parseArgs(args);
+
+        List<String> requestIds = new ArrayList<>();
+        if (commandLine.hasOption("r")) {
+            log.info("Fetching data from LimsRest for provided request ids...");
+            requestIds = Arrays.asList(commandLine.getOptionValue("r").split(","));
+        } else {
+            log.info("Fetching data from LimsRest by the provided timestamp(s)....");
+            requestIds = getRequestIdsByTimestamp(commandLine.getOptionValue("s"),
+                    commandLine.getOptionValue("e"));
+            log.info("Found " + requestIds.size() + " requests within provided timestamp(s)...");
+        }
+
         messagingGateway.connect();
         Gson gson = new Gson();
         try {
-            for (String r : requestIds.split(",")) {
+            for (String r : requestIds) {
                 Map<String, Object> request = fetchRequestAndSamplesFromLims(r);
                 String requestJson = gson.toJson(request);
-                log.info("\nPublishing IGO new request to MetaDB:\n\n"
+                log.debug("\nPublishing IGO new request to MetaDB:\n\n"
                         + requestJson + "\n\n on topic: " + IGO_NEW_REQUEST_TOPIC);
                 messagingGateway.publish(IGO_NEW_REQUEST_TOPIC, requestJson);
             }
@@ -92,6 +149,46 @@ public class CmoNewRequestPublisher implements CommandLineRunner {
             log.error("Error encountered during attempt to process request ids - exiting...");
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Returns list of request ids as strings based on the start date provided.
+     * If end date is also provided then the set of request ids returned will be
+     * filtered.
+     *
+     * @param startDate
+     * @param endDate
+     * @return List
+     * @throws Exception
+     */
+    private List<String> getRequestIdsByTimestamp(String startDate, String endDate) throws Exception {
+        Date startTimestamp = null;
+        Date endTimestamp = null;
+
+        // parse start date
+        try {
+            startTimestamp = dateFormat.parse(startDate);
+        } catch (ParseException ex) {
+            log.error("Error parsing start date - must be provided in format: YYYY/MM/DD");
+            System.exit(2);
+        }
+        // parse end date if provided
+        if (endDate != null) {
+            try {
+                endTimestamp = dateFormat.parse(endDate);
+            } catch (ParseException ex) {
+                log.error("Error parsing end date - must be provided in format: YYYY/MM/DD");
+                System.exit(2);
+            }
+            // also check that end timestamp occurs after start timestamp
+            if (endTimestamp.before(startTimestamp)) {
+                log.error("End date provided must occur after the start date provided.");
+                System.exit(2);
+            }
+        }
+        // get start date as milliseconds and fetch set of requests from LimsRest
+        List<String> requestIds = getLimsRequestsByTimestamp(startTimestamp, endTimestamp);
+        return requestIds;
     }
 
     /**
@@ -112,6 +209,39 @@ public class CmoNewRequestPublisher implements CommandLineRunner {
         }
         return builder.toString();
     }
+
+    /**
+     * Calls LimsRest and returns the list of samples for a given request id.
+     * @param requestId
+     * @return Map
+     * @throws Exception
+     */
+    private List<String> getLimsRequestsByTimestamp(Date startTimestamp, Date endTimestamp) throws Exception {
+        Gson gson = new Gson();
+        String requestUrl = limsBaseUrl + limsRequestDeliveriesEndpoint
+                + String.valueOf(startTimestamp.getTime());
+        RestTemplate restTemplate = getRestTemplate();
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = getRequestEntity();
+        ResponseEntity responseEntity = restTemplate.exchange(requestUrl,
+                HttpMethod.GET, requestEntity, Object.class);
+        List<Map> response = gson.fromJson(gson.toJson(responseEntity.getBody()), List.class);
+
+        // if endtimestamp is provided then use it to filter the response results
+        // otherwise simply return set of request ids from response as list of strings
+        List<String> requestIds = new ArrayList<>();
+        for (Map m : response) {
+            Double deliveryDate = (Double) m.get("deliveryDate");
+            Date deliveryDateTimestamp = new Date(Double.valueOf(deliveryDate).longValue());
+            if (endTimestamp != null && deliveryDateTimestamp.after(endTimestamp)) {
+                log.debug("Request delivery date not within specified range, it will be skipped: "
+                        + m.get("request") + ", date: " + dateFormat.format(endTimestamp));
+                continue;
+            }
+            requestIds.add((String) m.get("request"));
+        }
+        return requestIds;
+    }
+
 
     /**
      * Returns request metadata and the sample manifest list for all samples given a request id.
