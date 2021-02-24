@@ -1,5 +1,13 @@
+# default properties
+spring.batch.job.enabled=false
+chunk.interval=10
+async.thread_pool_size=5
+async.thread_pool_max=10
+processor.thread_pool_size=5
+processor.thread_pool_max=10
+
 # client-specific topics to listen or publish on
-igo.new_request_topic=
+lims.publisher_topic=
 
 # nats connection properties
 nats.clusterid=
@@ -13,3 +21,6 @@ lims.password=
 lims.request_samples_endpoint=
 lims.sample_manifest_endpoint=
 lims.request_deliveries_endpoint=
+
+# metadb publishing failures filepath
+metadb.publishing_failures_filepath=
