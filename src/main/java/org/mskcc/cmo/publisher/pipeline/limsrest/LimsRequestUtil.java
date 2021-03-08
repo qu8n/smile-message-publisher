@@ -1,6 +1,7 @@
 package org.mskcc.cmo.publisher.pipeline.limsrest;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class LimsRequestUtil {
 
     protected Map<String, List<String>> limsRequestErrors = new HashMap<>();
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd");
-
+    private ObjectMapper mapper =  new ObjectMapper();
     private final Logger LOG = Logger.getLogger(LimsRequestUtil.class);
 
     /**
@@ -94,14 +95,14 @@ public class LimsRequestUtil {
      */
     public List<String> getLimsRequestIdsByTimestamp(Date startTimestamp, Date endTimestamp)
             throws Exception {
-        Gson gson = new Gson();
         String requestUrl = limsBaseUrl + limsRequestDeliveriesEndpoint
                 + String.valueOf(startTimestamp.getTime());
         RestTemplate restTemplate = getRestTemplate();
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = getRequestEntity();
         ResponseEntity responseEntity = restTemplate.exchange(requestUrl,
                 HttpMethod.GET, requestEntity, Object.class);
-        List<Map> response = gson.fromJson(gson.toJson(responseEntity.getBody()), List.class);
+        List<Map> response = mapper.readValue(
+                mapper.writeValueAsString(responseEntity.getBody()), List.class);
 
         // if endtimestamp is provided then use it to filter the response results
         // otherwise simply return set of request ids from response as list of strings
@@ -127,14 +128,14 @@ public class LimsRequestUtil {
      */
     @Async("asyncLimsRequestThreadPoolTaskExecutor")
     public CompletableFuture<Map<String, Object>> getLimsRequestSamples(String requestId) throws Exception {
-        Gson gson = new Gson();
         String requestUrl = limsBaseUrl + limsRequestSamplesEndpoint + requestId;
         RestTemplate restTemplate = getRestTemplate();
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = getRequestEntity();
         ResponseEntity responseEntity = restTemplate.exchange(requestUrl,
                 HttpMethod.GET, requestEntity, Object.class);
-        Map<String, Object> response = gson.fromJson(gson.toJson(responseEntity.getBody()), Map.class);
-        LOG.debug("Response from LIMS:\n" + gson.toJson(response));
+        Map<String, Object> response = mapper.readValue(
+                mapper.writeValueAsString(responseEntity.getBody()), Map.class);
+        LOG.debug("Response from LIMS:\n" + mapper.writeValueAsString(responseEntity.getBody()));
         return CompletableFuture.completedFuture(response);
     }
 
@@ -143,10 +144,10 @@ public class LimsRequestUtil {
      * @param response
      * @return
      */
-    public List<String> getSampleIdsFromRequestResponse(Map<String, Object> response) {
-        Gson gson = new Gson();
-        String samplesListJson = gson.toJson(response.get("samples"));
-        List<Map> samplesListMap = gson.fromJson(samplesListJson, List.class);
+    public List<String> getSampleIdsFromRequestResponse(Map<String, Object> response)
+            throws JsonProcessingException {
+        String samplesListJson = mapper.writeValueAsString(response.get("samples"));
+        List<Map> samplesListMap = mapper.readValue(samplesListJson, List.class);
         List<String> sampleIds = new ArrayList<>();
         for (Map m : samplesListMap) {
             sampleIds.add((String) m.get("igoSampleId"));
