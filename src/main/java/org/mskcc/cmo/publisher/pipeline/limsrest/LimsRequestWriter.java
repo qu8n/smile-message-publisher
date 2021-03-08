@@ -1,6 +1,6 @@
 package org.mskcc.cmo.publisher.pipeline.limsrest;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
@@ -23,6 +23,7 @@ public class LimsRequestWriter implements ItemStreamWriter<Map<String, Object>> 
     @Value("${lims.publisher_topic}")
     private String LIMS_PUBLISHER_TOPIC;
 
+    private ObjectMapper mapper = new ObjectMapper();
     private final Logger LOG = Logger.getLogger(LimsRequestWriter.class);
 
     @Override
@@ -37,9 +38,8 @@ public class LimsRequestWriter implements ItemStreamWriter<Map<String, Object>> 
     @Override
     public void write(List<? extends Map<String, Object>> requestResponseList) throws Exception {
         for (Map<String, Object> request : requestResponseList) {
-            Gson gson = new Gson();
             try {
-                String requestJson = gson.toJson(request);
+                String requestJson = mapper.writeValueAsString(request);
                 LOG.debug("\nPublishing IGO new request to MetaDB:\n\n"
                         + requestJson + "\n\n on topic: " + LIMS_PUBLISHER_TOPIC);
                 messagingGateway.publish(LIMS_PUBLISHER_TOPIC, requestJson);
