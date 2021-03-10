@@ -7,12 +7,11 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
-import org.mskcc.cmo.publisher.pipeline.BatchConfiguration;
+import org.mskcc.cmo.publisher.pipeline.config.BatchConfiguration;
 import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestUtil;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.boot.SpringApplication;
@@ -34,23 +33,33 @@ public class CmoMetaDbPublisherPipeline {
         CommandLine commandLine = parseArgs(args);
 
         String jobName = null;
-        JobExecution jobExecution = null;
+        JobParametersBuilder jobParamsBuilder = new JobParametersBuilder();
         if (commandLine.hasOption("r") || commandLine.hasOption("s")) {
             // validatate format for start date and end date (if applicable)
             if (commandLine.hasOption("s")) {
                 validateProvidedDates(commandLine.getOptionValue("s"), commandLine.getOptionValue("e"));
             }
+            // set up job params for lims request publisher job
             jobName = BatchConfiguration.LIMS_REQUEST_PUBLISHER_JOB;
-            jobExecution = launchLimsRequestPublisherJob(ctx, commandLine.getOptionValue("r"),
-                    commandLine.getOptionValue("s"), commandLine.getOptionValue("e"));
-        } else {
-            LOG.error("Must run application with at least option '-r' or '-s' - exiting...");
-            System.exit(1);
+            jobParamsBuilder.addString("requestIds", commandLine.getOptionValue("r"))
+                .addString("startDate", commandLine.getOptionValue("s"))
+                .addString("endDate", commandLine.getOptionValue("e"));
+        } else if (commandLine.hasOption("f")) {
+            jobName = BatchConfiguration.METADB_FILE_PUBLISHER_JOB;
+            jobParamsBuilder.addString("publisherFilename", commandLine.getOptionValue("f"));
         }
+
+        // set up job, job launcher, and job execution
+        JobLauncher jobLauncher = ctx.getBean(JobLauncher.class);
+        Job job = ctx.getBean(jobName, Job.class);
+        JobExecution jobExecution = jobLauncher.run(job, jobParamsBuilder.toJobParameters());
         if (!jobExecution.getExitStatus().equals(ExitStatus.COMPLETED)) {
             LOG.error(jobName + " failed with exit status: " + jobExecution.getExitStatus());
-            System.exit(1);
+        } else {
+            LOG.info("Job completed with exit status: '" + jobExecution.getExitStatus().getExitCode()
+                    + "' - exiting application");
         }
+        System.exit(SpringApplication.exit(ctx));
     }
 
 
@@ -85,27 +94,16 @@ public class CmoMetaDbPublisherPipeline {
         }
     }
 
-    private static JobExecution launchLimsRequestPublisherJob(ConfigurableApplicationContext ctx,
-            String requestIds, String startDate, String endDate) throws Exception {
-        JobParameters jobParameters = new JobParametersBuilder()
-                .addString("requestIds", requestIds)
-                .addString("startDate", startDate)
-                .addString("endDate", endDate)
-                .toJobParameters();
-        JobLauncher jobLauncher = ctx.getBean(JobLauncher.class);
-        Job job = ctx.getBean(BatchConfiguration.LIMS_REQUEST_PUBLISHER_JOB, Job.class);
-        return jobLauncher.run(job, jobParameters);
-    }
-
     private static Options getOptions(String[] args) {
         Options options = new Options();
         options.addOption("h", "help", false, "shows this help document and quits.")
                 .addOption("r", "request_ids", true, "Comma-separated list of request ids to fetch "
-                + "data for from LimsRest")
+                + "data for from LimsRest [REQUEST IDS MODE]")
                 .addOption("s", "start_date", true, "Start date [YYYY/MM/DD], fetch requests from "
-                        + "LimsRest beginning from the given start date")
+                        + "LimsRest beginning from the given start date [START/END DATE MODE]")
                 .addOption("e", "end_date", true, "End date [YYYY/MM/DD]. Fetch requests from LimsRest "
-                        + "between the start and end dates provided. [OPTIONAL]");
+                        + "between the start and end dates provided. [OPTIONAL, START/END DATE MODE]")
+                .addOption("f", "publisher_filename", true, "Input publisher filename [FILE READING MODE]");
         return options;
     }
 
@@ -120,11 +118,23 @@ public class CmoMetaDbPublisherPipeline {
         CommandLineParser parser = new DefaultParser();
         CommandLine commandLine = parser.parse(options, args);
         if (commandLine.hasOption("h")
-                || (!commandLine.hasOption("r") && !commandLine.hasOption("s"))) {
+                || (!commandLine.hasOption("r")
+                && !commandLine.hasOption("s") && !commandLine.hasOption("f"))) {
             help(options, 0);
         }
-        if (commandLine.hasOption("r") && (commandLine.hasOption("s") || commandLine.hasOption("e"))) {
+        // check that command line options entered are valid
+        if (commandLine.hasOption("r") && (commandLine.hasOption("s")
+                || commandLine.hasOption("e"))) {
             LOG.error("Cannot use '--request_ids with '--start_date' or '--end_date'");
+            help(options, 1);
+        } else if (commandLine.hasOption("f") && (commandLine.hasOption("r")
+                || (commandLine.hasOption("s") || commandLine.hasOption("e")))) {
+            LOG.error("Cannot use '--publisher_filename' with '--request_ids' or"
+                    + "'--start_date | --end_date'");
+            help(options, 1);
+        } else if (!commandLine.hasOption("h") && !commandLine.hasOption("s")
+                && !commandLine.hasOption("f")) {
+            LOG.error("Must run application with at least option '-r', '-s', or '-f' - exiting...");
             help(options, 1);
         }
         return commandLine;
