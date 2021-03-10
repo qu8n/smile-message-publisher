@@ -133,7 +133,7 @@ public class CmoMetaDbPublisherPipeline {
                     + "'--start_date | --end_date'");
             help(options, 1);
         } else if (!commandLine.hasOption("h") && !commandLine.hasOption("s")
-                && !commandLine.hasOption("f")) {
+                && !commandLine.hasOption("f") && !commandLine.hasOption("r")) {
             LOG.error("Must run application with at least option '-r', '-s', or '-f' - exiting...");
             help(options, 1);
         }
