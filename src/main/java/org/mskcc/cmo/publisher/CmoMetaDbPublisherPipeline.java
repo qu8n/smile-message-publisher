@@ -62,7 +62,6 @@ public class CmoMetaDbPublisherPipeline {
         System.exit(SpringApplication.exit(ctx));
     }
 
-
     /**
      * Validate the start and end dates provided if applicable.
      * @param startDate
