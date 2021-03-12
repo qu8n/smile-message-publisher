@@ -68,9 +68,10 @@ public class BatchConfiguration {
     @Autowired
     private Gateway messagingGateway;
 
-    @Autowired
-    public void initMessagingGateway() throws Exception {
+    @Bean
+    public Gateway messagingGateway() throws Exception {
         messagingGateway.connect();
+        return messagingGateway;
     }
 
     /**
