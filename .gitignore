@@ -4,6 +4,8 @@
 *.metadata/target/
 *.project
 *.settings
+*.idea
+*.iml
 *application.properties
 *log4j.properties
 *checkstyle_report*.txt
