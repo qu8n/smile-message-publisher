@@ -12,23 +12,22 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>1.2.7.RELEASE</version>
+    <version>2.3.3.RELEASE</version>
   </parent>
 
   <properties>
     <java.version>1.8</java.version>
     <maven.compiler.version>1.8</maven.compiler.version>
     <spring.boot.version>2.3.3.RELEASE</spring.boot.version>
-    <spring.version>5.2.6.RELEASE</spring.version>
+    <spring.version>5.2.8.RELEASE</spring.version>
     <slf4j.version>1.7.30</slf4j.version>
     <jackson.version>2.11.2</jackson.version>
     <!-- metadb messaging -->
-    <cmo_metadb_messaging_java.group>com.github.ao508</cmo_metadb_messaging_java.group>
-    <cmo_metadb_messaging_java.version>c757f5c120fdb8d46fe5970892a7d6a6c2f3d7a4</cmo_metadb_messaging_java.version>
+    <cmo_metadb_messaging_java.group>com.github.mskcc</cmo_metadb_messaging_java.group>
+    <cmo_metadb_messaging_java.version>e09ff1f5322493dad4aab7b7dbd312e61f624cd1</cmo_metadb_messaging_java.version>
     <!-- metadb common centralized config properties -->
     <cmo_metadb_common.groupId>com.github.mskcc</cmo_metadb_common.groupId>
-    <cmo_metadb_common.artifactId>cmo-metadb-common</cmo_metadb_common.artifactId>
-    <cmo_metadb_common.version>v1.1-alpha</cmo_metadb_common.version>
+    <cmo_metadb_common.version>16c1f1fdc990e34714eccbaefabf99c61088de3c</cmo_metadb_common.version>
   </properties>
 
   <repositories>
@@ -51,27 +50,28 @@
       <groupId>${cmo_metadb_messaging_java.group}</groupId>
       <artifactId>cmo-messaging-java</artifactId>
       <version>${cmo_metadb_messaging_java.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-    <!-- slf4j and logging configurer deps-->
+    <!-- logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <version>${slf4j.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-api</artifactId>
-      <version>2.5</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-      <version>2.5</version>
+     <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>apache-log4j-extras</artifactId>
+      <version>1.0</version>
     </dependency>
     <!-- spring boot and spring batch -->
     <dependency>
@@ -94,25 +94,6 @@
       <version>4.2.2.RELEASE</version>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>log4j-over-slf4j</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>ch.qos.logback</groupId>
-          <artifactId>logback-classic</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
     </dependency>
@@ -127,6 +108,12 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
+    </dependency>
+    <!-- SQLite database driver for batch datasource configuration -->
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.15.1</version>
     </dependency>
     <!-- extra -->
     <dependency>
@@ -173,7 +160,7 @@
         <dependencies>
           <dependency>
             <groupId>${cmo_metadb_common.groupId}</groupId>
-            <artifactId>${cmo_metadb_common.artifactId}</artifactId>
+            <artifactId>cmo-metadb-common</artifactId>
             <version>${cmo_metadb_common.version}</version>
           </dependency>
         </dependencies>
