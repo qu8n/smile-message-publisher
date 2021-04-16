@@ -10,8 +10,8 @@ processor.thread_pool_max=10
 lims.publisher_topic=
 
 # nats connection properties
-nats.clusterid=
-nats.clientid=
+nats.consumer_name=
+nats.consumer_password=
 nats.url=
 
 # nats ssl
