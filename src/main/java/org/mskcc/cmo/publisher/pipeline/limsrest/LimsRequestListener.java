@@ -1,6 +1,7 @@
 package org.mskcc.cmo.publisher.pipeline.limsrest;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -14,7 +15,7 @@ public class LimsRequestListener implements StepExecutionListener {
     @Autowired
     private LimsRequestUtil limsRestUtil;
 
-    private final Logger LOG = Logger.getLogger(LimsRequestListener.class);
+    private static final Log LOG = LogFactory.getLog(LimsRequestListener.class);
 
     @Override
     public void beforeStep(StepExecution se) {}

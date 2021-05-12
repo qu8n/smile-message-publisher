@@ -6,7 +6,8 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mskcc.cmo.publisher.pipeline.config.BatchConfiguration;
 import org.mskcc.cmo.publisher.pipeline.limsrest.LimsRequestUtil;
 import org.springframework.batch.core.ExitStatus;
@@ -25,7 +26,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 @SpringBootApplication
 public class CmoMetaDbPublisherPipeline {
 
-    private static final Logger LOG = Logger.getLogger(CmoMetaDbPublisherPipeline.class);
+    private static final Log LOG = LogFactory.getLog(CmoMetaDbPublisherPipeline.class);
 
     public static void main(String[] args) throws Exception {
         SpringApplication app = new SpringApplication(CmoMetaDbPublisherPipeline.class);

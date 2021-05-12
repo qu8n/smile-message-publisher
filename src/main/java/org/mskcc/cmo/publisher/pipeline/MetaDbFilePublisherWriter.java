@@ -2,7 +2,8 @@ package org.mskcc.cmo.publisher.pipeline;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mskcc.cmo.messaging.Gateway;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
@@ -17,7 +18,7 @@ public class MetaDbFilePublisherWriter implements ItemStreamWriter<Map<String, S
     @Autowired
     private Gateway messagingGateway;
 
-    private final Logger LOG = Logger.getLogger(MetaDbFilePublisherWriter.class);
+    private static final Log LOG = LogFactory.getLog(MetaDbFilePublisherWriter.class);
 
     @Override
     public void open(ExecutionContext ec) throws ItemStreamException {}

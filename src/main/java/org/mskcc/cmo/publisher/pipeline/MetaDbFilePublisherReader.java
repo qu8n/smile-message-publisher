@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamReader;
@@ -28,7 +29,7 @@ public class MetaDbFilePublisherReader implements ItemStreamReader<Map<String, S
 
     private List<Map<String, String>> messagesToPublish;
 
-    private Logger LOG = Logger.getLogger(MetaDbFilePublisherReader.class);
+    private static final Log LOG = LogFactory.getLog(MetaDbFilePublisherReader.class);
 
     @Override
     public void open(ExecutionContext ec) throws ItemStreamException {

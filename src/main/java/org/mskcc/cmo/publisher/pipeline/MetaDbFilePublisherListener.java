@@ -1,6 +1,7 @@
 package org.mskcc.cmo.publisher.pipeline;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -10,7 +11,7 @@ import org.springframework.batch.core.StepExecutionListener;
  * @author ochoaa
  */
 public class MetaDbFilePublisherListener implements StepExecutionListener {
-    private final Logger LOG = Logger.getLogger(MetaDbFilePublisherListener.class);
+    private static final Log LOG = LogFactory.getLog(MetaDbFilePublisherListener.class);
 
     @Override
     public void beforeStep(StepExecution se) {}
