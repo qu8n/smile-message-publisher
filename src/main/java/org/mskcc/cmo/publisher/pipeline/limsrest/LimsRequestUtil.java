@@ -14,12 +14,13 @@ import java.util.concurrent.CompletableFuture;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -61,7 +62,7 @@ public class LimsRequestUtil {
     protected Map<String, List<String>> limsRequestErrors = new HashMap<>();
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd");
     private ObjectMapper mapper =  new ObjectMapper();
-    private final Logger LOG = Logger.getLogger(LimsRequestUtil.class);
+    private static final Log LOG = LogFactory.getLog(LimsRequestUtil.class);
 
     /**
      * Returns list of request ids as strings based on the start date provided.

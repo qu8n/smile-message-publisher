@@ -3,7 +3,8 @@ package org.mskcc.cmo.publisher.pipeline.limsrest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mskcc.cmo.messaging.Gateway;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
@@ -24,7 +25,7 @@ public class LimsRequestWriter implements ItemStreamWriter<Map<String, Object>> 
     private String LIMS_PUBLISHER_TOPIC;
 
     private ObjectMapper mapper = new ObjectMapper();
-    private final Logger LOG = Logger.getLogger(LimsRequestWriter.class);
+    private static final Log LOG = LogFactory.getLog(LimsRequestWriter.class);
 
     @Override
     public void open(ExecutionContext ec) throws ItemStreamException {}
