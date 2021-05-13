@@ -109,8 +109,8 @@ public class LimsRequestUtil {
         // otherwise simply return set of request ids from response as list of strings
         List<String> requestIds = new ArrayList<>();
         for (Map m : response) {
-            Double deliveryDate = (Double) m.get("deliveryDate");
-            Date deliveryDateTimestamp = new Date(Double.valueOf(deliveryDate).longValue());
+            Long deliveryDate = (Long) m.get("deliveryDate");
+            Date deliveryDateTimestamp = new Date(deliveryDate);
             if (endTimestamp != null && deliveryDateTimestamp.after(endTimestamp)) {
                 LOG.debug("Request delivery date not within specified range, it will be skipped: "
                         + m.get("request") + ", date: " + DATE_FORMAT.format(endTimestamp));
