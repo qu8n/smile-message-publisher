@@ -150,8 +150,10 @@ public class LimsRequestUtil {
         String samplesListJson = mapper.writeValueAsString(response.get("samples"));
         List<Map> samplesListMap = mapper.readValue(samplesListJson, List.class);
         List<String> sampleIds = new ArrayList<>();
-        for (Map m : samplesListMap) {
-            sampleIds.add((String) m.get("igoSampleId"));
+        if (samplesListMap != null) {
+            for (Map m : samplesListMap) {
+                sampleIds.add((String) m.get("igoSampleId"));
+            }
         }
         return sampleIds;
     }

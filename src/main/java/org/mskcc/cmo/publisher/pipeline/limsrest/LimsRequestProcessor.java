@@ -4,14 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+
+
 
 /**
  *
  * @author ochoaa
  */
 public class LimsRequestProcessor implements ItemProcessor<String, Map<String, Object>> {
+    private static final Log LOG = LogFactory.getLog(LimsRequestProcessor.class);
+
     @Autowired
     private LimsRequestUtil limsRestUtil;
 
@@ -21,6 +27,11 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
                 limsRestUtil.getLimsRequestSamples(requestId);
         Map<String, Object> requestResponse = futureRequestResponse.get();
         List<String> sampleIds = limsRestUtil.getSampleIdsFromRequestResponse(requestResponse);
+
+        if (!requestResponse.containsKey("samples") || sampleIds == null || sampleIds.isEmpty()) {
+            LOG.error("Parsing request with no samples" + requestId);
+            return null;
+        }
 
         // get sample manifest for each sample id
         List<Object> sampleManifestList = new ArrayList<>();
