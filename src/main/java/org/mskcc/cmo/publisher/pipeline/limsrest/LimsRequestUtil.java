@@ -222,33 +222,36 @@ public class LimsRequestUtil {
     /**
      * Update map with lims request errors.
      * @param requestId
-     * @param sampleId
+     * @param error
      */
-    public void updateLimsRequestErrors(String requestId, String sampleId) {
-        List<String> sList = limsRequestErrors.getOrDefault(requestId, new ArrayList<>());
-        sList.add(sampleId);
-        this.limsRequestErrors.put(requestId, sList);
+    public void updateLimsRequestErrors(String requestId, String error) {
+        List<String> errors = limsRequestErrors.getOrDefault(requestId, new ArrayList<>());
+        errors.add(error);
+        this.limsRequestErrors.put(requestId, errors);
     }
 
     public void printFailedRequestSamplesSummary() {
-        System.out.println(generateFailedRequestSamplesSummary());
+        System.out.println(generateFailedRequestErrorsSummary());
     }
 
     /**
      * Generates message for failed request samples manifest report.
      * @return
      */
-    private String generateFailedRequestSamplesSummary() {
+    private String generateFailedRequestErrorsSummary() {
         StringBuilder builder = new StringBuilder("\nERROR SUMMARY REPORT BY REQUEST\n");
         for (String requestId : limsRequestErrors.keySet()) {
-            List<String> requestSamples = limsRequestErrors.get(requestId);
+            List<String> errors = limsRequestErrors.get(requestId);
             builder.append("\nRequest: ")
                     .append(requestId)
                     .append(", errors: ")
-                    .append(requestSamples.size())
-                    .append("\n\tSamples: ")
-                    .append(StringUtils.join(requestSamples, ","))
-                    .append("\n");
+                    .append(errors.size());
+            for (String er : errors) {
+                builder.append("\n\t")
+                        .append(er)
+                        .append("\n");
+            }
+            builder.append("\n");
         }
         return builder.toString();
     }

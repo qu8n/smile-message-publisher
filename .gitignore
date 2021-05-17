@@ -10,3 +10,4 @@
 *log4j.properties
 *checkstyle_report*.txt
 /target/
+repository.sqlite
