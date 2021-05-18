@@ -116,7 +116,11 @@ public class LimsRequestUtil {
                         + m.get("request") + ", date: " + DATE_FORMAT.format(endTimestamp));
                 continue;
             }
-            requestIds.add((String) m.get("request"));
+            // only add unique request ids to list
+            String requestId = (String) m.get("request");
+            if (!requestIds.contains(requestId)) {
+                requestIds.add(requestId);
+            }
         }
         return requestIds;
     }
