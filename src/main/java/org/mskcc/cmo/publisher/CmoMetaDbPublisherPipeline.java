@@ -44,7 +44,8 @@ public class CmoMetaDbPublisherPipeline {
             jobName = BatchConfiguration.LIMS_REQUEST_PUBLISHER_JOB;
             jobParamsBuilder.addString("requestIds", commandLine.getOptionValue("r"))
                 .addString("startDate", commandLine.getOptionValue("s"))
-                .addString("endDate", commandLine.getOptionValue("e"));
+                .addString("endDate", commandLine.getOptionValue("e"))
+                .addString("cmoRequestsFilter", String.valueOf(commandLine.hasOption("c")));
         } else if (commandLine.hasOption("f")) {
             jobName = BatchConfiguration.METADB_FILE_PUBLISHER_JOB;
             jobParamsBuilder.addString("publisherFilename", commandLine.getOptionValue("f"));
@@ -103,6 +104,8 @@ public class CmoMetaDbPublisherPipeline {
                         + "LimsRest beginning from the given start date [START/END DATE MODE]")
                 .addOption("e", "end_date", true, "End date [YYYY/MM/DD]. Fetch requests from LimsRest "
                         + "between the start and end dates provided. [OPTIONAL, START/END DATE MODE]")
+                .addOption("c", "cmo_requests", false, "Filter LIMS requests by CMO requests only "
+                        + "[OPTIONAL, START/END MODE & REQUEST IDS MODE]")
                 .addOption("f", "publisher_filename", true, "Input publisher filename [FILE READING MODE]");
         return options;
     }
@@ -131,6 +134,9 @@ public class CmoMetaDbPublisherPipeline {
                 || (commandLine.hasOption("s") || commandLine.hasOption("e")))) {
             LOG.error("Cannot use '--publisher_filename' with '--request_ids' or"
                     + "'--start_date | --end_date'");
+            help(options, 1);
+        } else if (commandLine.hasOption("c") && commandLine.hasOption("f")) {
+            LOG.error("Cannot use --cmo_requests option with --publisher_filename");
             help(options, 1);
         } else if (!commandLine.hasOption("h") && !commandLine.hasOption("s")
                 && !commandLine.hasOption("f") && !commandLine.hasOption("r")) {

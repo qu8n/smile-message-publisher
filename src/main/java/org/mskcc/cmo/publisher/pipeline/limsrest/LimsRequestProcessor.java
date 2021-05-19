@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 
 
@@ -19,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class LimsRequestProcessor implements ItemProcessor<String, Map<String, Object>> {
     private static final Log LOG = LogFactory.getLog(LimsRequestProcessor.class);
 
+    @Value("#{jobParameters[cmoRequestsFilter]}")
+    private Boolean cmoRequestsFilter;
+
     @Autowired
     private LimsRequestUtil limsRestUtil;
 
@@ -27,6 +31,16 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
         CompletableFuture<Map<String, Object>> futureRequestResponse =
                 limsRestUtil.getLimsRequestSamples(requestId);
         Map<String, Object> requestResponse = futureRequestResponse.get();
+        // if filtering by cmo requests only then return null if request is not a cmo request
+        // if the field is not available in the json response then set default to false
+        if (cmoRequestsFilter) {
+            Boolean cmoRequest = (Boolean) requestResponse.getOrDefault("cmoRequest", Boolean.FALSE);
+            if (!cmoRequest) {
+                LOG.info("Skipping non-CMO request '" + requestId + "'");
+                limsRestUtil.updateLimsRequestErrors(requestId, "Non-CMO request");
+                return null;
+            }
+        }
         List<String> sampleIds = limsRestUtil.getSampleIdsFromRequestResponse(requestResponse);
 
         if (!requestResponse.containsKey("samples") || sampleIds == null || sampleIds.isEmpty()) {
