@@ -244,6 +244,9 @@ public class LimsRequestUtil {
      */
     private String generateFailedRequestErrorsSummary() {
         StringBuilder builder = new StringBuilder("\nERROR SUMMARY REPORT BY REQUEST\n");
+        builder.append("\t--> Total number of requests with errors: ")
+                .append(limsRequestErrors.size())
+                .append("\n");
         for (String requestId : limsRequestErrors.keySet()) {
             List<String> errors = limsRequestErrors.get(requestId);
             builder.append("\nRequest: ")
@@ -255,7 +258,6 @@ public class LimsRequestUtil {
                         .append(er)
                         .append("\n");
             }
-            builder.append("\n");
         }
         return builder.toString();
     }
