@@ -34,8 +34,8 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
         // if filtering by cmo requests only then return null if request is not a cmo request
         // if the field is not available in the json response then set default to false
         if (cmoRequestsFilter) {
-            Boolean cmoRequest = (Boolean) requestResponse.getOrDefault("cmoRequest", Boolean.FALSE);
-            if (!cmoRequest) {
+            Boolean isCmoRequest = (Boolean) requestResponse.getOrDefault("isCmoRequest", Boolean.FALSE);
+            if (!isCmoRequest) {
                 LOG.info("Skipping non-CMO request '" + requestId + "'");
                 limsRestUtil.updateLimsRequestErrors(requestId, "Non-CMO request");
                 return null;
@@ -70,11 +70,6 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
         // update request response with sample manifests fetched
         // and add project id as well for cmo metadb
         String projectId = requestId.split("_")[0];
-        // TODO: remove this key for now manually
-        //later we wont be getting this anymore
-        if (requestResponse.containsKey("isCmoRequest")) {
-            requestResponse.remove("isCmoRequest");
-        }
         requestResponse.put("projectId", projectId);
         requestResponse.put("samples", sampleManifestList);
         return requestResponse;
