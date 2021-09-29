@@ -44,7 +44,7 @@ public class LimsRequestWriter implements ItemStreamWriter<Map<String, Object>> 
                 String requestJson = mapper.writeValueAsString(request);
                 LOG.debug("\nPublishing IGO new request to MetaDB:\n\n"
                         + requestJson + "\n\n on topic: " + LIMS_PUBLISHER_TOPIC);
-                messagingGateway.publish(requestId, LIMS_PUBLISHER_TOPIC, requestJson);
+                messagingGateway.publish(LIMS_PUBLISHER_TOPIC, requestJson);
             } catch (Exception e) {
                 LOG.error("Error encountered during attempt to process request ids - exiting...");
                 throw new RuntimeException(e);
