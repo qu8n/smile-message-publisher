@@ -53,11 +53,17 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
         List<String> samplesWithErrors = new ArrayList<>();
         List<Object> sampleManifestList = new ArrayList<>();
         for (String sampleId : sampleIds) {
-            CompletableFuture<List<Object>> manifest = limsRestUtil.getSampleManifest(sampleId);
-            if (manifest != null) {
-                sampleManifestList.addAll(manifest.get());
-            } else {
+            try {
+                CompletableFuture<List<Object>> manifest = limsRestUtil.getSampleManifest(sampleId);
+                if (manifest != null) {
+                    sampleManifestList.addAll(manifest.get());
+                } else {
+                    samplesWithErrors.add(sampleId);
+                }
+            } catch (Exception e) {
                 samplesWithErrors.add(sampleId);
+                LOG.warn("Encountered error during attempt to fetch sample manifest for sample: "
+                        + sampleId, e);
             }
         }
         if (!samplesWithErrors.isEmpty()) {
