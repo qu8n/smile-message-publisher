@@ -1,5 +1,6 @@
 package org.mskcc.cmo.publisher.pipeline.limsrest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
@@ -39,15 +40,15 @@ public class LimsRequestWriter implements ItemStreamWriter<Map<String, Object>> 
     @Override
     public void write(List<? extends Map<String, Object>> requestResponseList) throws Exception {
         for (Map<String, Object> request : requestResponseList) {
+            String requestId = (String) request.get("requestId");
+            String requestJson = mapper.writeValueAsString(request);
+            LOG.debug("\nPublishing IGO new request to MetaDB:\n\n"
+                    + requestJson + "\n\n on topic: " + LIMS_PUBLISHER_TOPIC);
             try {
-                String requestId = (String) request.get("requestId");
-                String requestJson = mapper.writeValueAsString(request);
-                LOG.debug("\nPublishing IGO new request to MetaDB:\n\n"
-                        + requestJson + "\n\n on topic: " + LIMS_PUBLISHER_TOPIC);
                 messagingGateway.publish(LIMS_PUBLISHER_TOPIC, requestJson);
             } catch (Exception e) {
-                LOG.error("Error encountered during attempt to process request ids - exiting...");
-                throw new RuntimeException(e);
+                LOG.error("Error during attempt to publish on topic '" + LIMS_PUBLISHER_TOPIC
+                        + "' for request: " + requestId, e);
             }
         }
     }
