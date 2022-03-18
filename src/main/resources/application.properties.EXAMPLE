@@ -8,6 +8,7 @@ processor.thread_pool_max=10
 
 # client-specific topics to listen or publish on
 lims.publisher_topic=
+nats.filter_subject=
 
 # nats connection properties
 nats.consumer_name=
