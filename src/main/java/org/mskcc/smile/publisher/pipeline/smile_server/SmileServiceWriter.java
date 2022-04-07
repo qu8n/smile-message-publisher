@@ -40,7 +40,7 @@ public class SmileServiceWriter implements ItemStreamWriter<String> {
     public void write(List<? extends String> requestResponseList) throws Exception {
         for (String requestJson : requestResponseList) {
             Map<String, Object> reqMap = mapper.readValue(requestJson, Map.class);
-            String requestId = (String) reqMap.get("requestId");
+            String requestId = (String) reqMap.get("igoRequestId");
             try {
                 messagingGateway.publish(requestId, CMO_NEW_REQ_TOPIC, requestJson);
             } catch (Exception e) {
