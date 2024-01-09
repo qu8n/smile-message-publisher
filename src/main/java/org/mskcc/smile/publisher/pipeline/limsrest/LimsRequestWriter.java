@@ -41,14 +41,14 @@ public class LimsRequestWriter implements ItemStreamWriter<Map<String, Object>> 
         for (Map<String, Object> request : requestResponseList) {
             String requestId = (String) request.get("requestId");
             String requestJson = mapper.writeValueAsString(request);
-            LOG.debug("\nPublishing IGO new request to SMILE:\n\n"
-                    + requestJson + "\n\n on topic: " + LIMS_PUBLISHER_TOPIC);
-            try {
-                messagingGateway.publish(LIMS_PUBLISHER_TOPIC, requestJson);
-            } catch (Exception e) {
-                LOG.error("Error during attempt to publish on topic '" + LIMS_PUBLISHER_TOPIC
-                        + "' for request: " + requestId, e);
-            }
+            // System.out.println("\nPublishing IGO new request to SMILE:\n\n"
+            //         + requestJson + "\n\n on topic: " + LIMS_PUBLISHER_TOPIC);
+            // try {
+            //     messagingGateway.publish(LIMS_PUBLISHER_TOPIC, requestJson);
+            // } catch (Exception e) {
+            //     LOG.error("Error during attempt to publish on topic '" + LIMS_PUBLISHER_TOPIC
+            //             + "' for request: " + requestId, e);
+            // }
         }
     }
 

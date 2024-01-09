@@ -111,7 +111,7 @@ public class LimsRequestUtil {
             Long deliveryDate = (Long) m.get("deliveryDate");
             Date deliveryDateTimestamp = new Date(deliveryDate);
             if (endTimestamp != null && deliveryDateTimestamp.after(endTimestamp)) {
-                LOG.debug("Request delivery date not within specified range, it will be skipped: "
+                System.out.println("Request delivery date not within specified range, it will be skipped: "
                         + m.get("request") + ", date: " + DATE_FORMAT.format(endTimestamp));
                 continue;
             }
@@ -139,7 +139,7 @@ public class LimsRequestUtil {
                 HttpMethod.GET, requestEntity, Object.class);
         Map<String, Object> response = mapper.readValue(
                 mapper.writeValueAsString(responseEntity.getBody()), Map.class);
-        LOG.debug("Response from LIMS:\n" + mapper.writeValueAsString(responseEntity.getBody()));
+        System.out.println("Response from LIMS:\n" + mapper.writeValueAsString(responseEntity.getBody()));
         return CompletableFuture.completedFuture(response);
     }
 
@@ -171,7 +171,7 @@ public class LimsRequestUtil {
     @Async("asyncLimsRequestThreadPoolTaskExecutor")
     public CompletableFuture<List<Object>> getSampleManifest(String sampleId) throws Exception {
         String manifestUrl = limsBaseUrl + limsSampleManifestEndpoint + sampleId;
-        LOG.debug("Sending request for sample manifest with url:" + manifestUrl);
+        System.out.println("Sending request for sample manifest with url:" + manifestUrl);
 
         RestTemplate restTemplate = getRestTemplate();
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = getRequestEntity();

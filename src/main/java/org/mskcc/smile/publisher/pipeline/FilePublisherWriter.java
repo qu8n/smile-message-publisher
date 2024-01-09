@@ -32,7 +32,7 @@ public class FilePublisherWriter implements ItemStreamWriter<Map<String, String>
     @Override
     public void write(List<? extends Map<String, String>> messagesToPublish) throws Exception {
         for (Map<String, String> record : messagesToPublish) {
-            LOG.debug("Publishing message: " + record.get("topic") + ", " + record.get("message"));
+            System.out.println("Publishing message: " + record.get("topic") + ", " + record.get("message"));
             messagingGateway.publish(record.get("topic"), record.get("message"));
         }
     }
