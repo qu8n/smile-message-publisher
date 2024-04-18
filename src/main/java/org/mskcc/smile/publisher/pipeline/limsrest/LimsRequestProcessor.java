@@ -55,6 +55,7 @@ public class LimsRequestProcessor implements ItemProcessor<String, Map<String, O
         // get sample manifest for each sample id
         List<String> samplesWithErrors = new ArrayList<>();
         List<Object> sampleManifestList = new ArrayList<>();
+        System.out.println("Printing sample manifests of count: " + samples.size());
         for (String sampleId : samples.keySet()) {
             try {
                 CompletableFuture<List<Object>> manifest = limsRestUtil.getSampleManifest(sampleId);
