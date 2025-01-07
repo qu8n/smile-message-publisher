@@ -139,7 +139,6 @@ public class LimsRequestUtil {
                 HttpMethod.GET, requestEntity, Object.class);
         Map<String, Object> response = mapper.readValue(
                 mapper.writeValueAsString(responseEntity.getBody()), Map.class);
-        System.out.println("Response from LIMS:\n" + mapper.writeValueAsString(responseEntity.getBody()));
         return CompletableFuture.completedFuture(response);
     }
 
@@ -180,8 +179,6 @@ public class LimsRequestUtil {
             ResponseEntity responseEntity = restTemplate.exchange(manifestUrl,
                 HttpMethod.GET, requestEntity, Object[].class);
             sampleManifest = (Object[]) responseEntity.getBody();
-
-            System.out.println(mapper.writeValueAsString(sampleManifest));
         } catch (HttpServerErrorException e) {
             if (e.getStatusCode().equals(HttpStatus.INTERNAL_SERVER_ERROR)) {
                 LOG.error("Error encountered during attempt to fetch sample manifest for '"

@@ -11,6 +11,7 @@ import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.json.JSONObject;
 
 /**
  *
@@ -41,6 +42,8 @@ public class LimsRequestWriter implements ItemStreamWriter<Map<String, Object>> 
         for (Map<String, Object> request : requestResponseList) {
             String requestId = (String) request.get("requestId");
             String requestJson = mapper.writeValueAsString(request);
+            JSONObject json = new JSONObject(requestJson);
+            System.out.println("\n\n\n" + json.toString(4) + "\n\n\n\n");
             // System.out.println("\nPublishing IGO new request to SMILE:\n\n"
             //         + requestJson + "\n\n on topic: " + LIMS_PUBLISHER_TOPIC);
             // try {
