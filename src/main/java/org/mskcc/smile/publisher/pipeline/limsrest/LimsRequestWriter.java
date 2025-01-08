@@ -41,9 +41,15 @@ public class LimsRequestWriter implements ItemStreamWriter<Map<String, Object>> 
     public void write(List<? extends Map<String, Object>> requestResponseList) throws Exception {
         for (Map<String, Object> request : requestResponseList) {
             String requestId = (String) request.get("requestId");
+
+            // Print request manifest to console
             String requestJson = mapper.writeValueAsString(request);
             JSONObject json = new JSONObject(requestJson);
             System.out.println("\n\n\n" + json.toString(4) + "\n\n\n\n");
+
+            // Print request manifest to file
+            mapper.writerWithDefaultPrettyPrinter().writeValue(new java.io.File(requestId + ".json"), request);
+
             // System.out.println("\nPublishing IGO new request to SMILE:\n\n"
             //         + requestJson + "\n\n on topic: " + LIMS_PUBLISHER_TOPIC);
             // try {
