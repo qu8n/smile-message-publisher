@@ -37,3 +37,4 @@ smile.publishing_failures_filepath=
 smile.base_url=
 smile.request_endpoint=
 smile.cmo_new_request_topic=
+smile.request_id.chunk_size=
